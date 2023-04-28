@@ -2,27 +2,21 @@ package main
 
 import (
 	"context"
-
+	"github.com/mehmetolgundev/distributed-watcher/domain/usecase"
+	"github.com/mehmetolgundev/distributed-watcher/infra/db"
+	"github.com/mehmetolgundev/distributed-watcher/infra/zookeeper"
 	"github.com/mehmetolgundev/distributed-watcher/repository"
-
-	"github.com/go-zookeeper/zk"
-	"github.com/mehmetolgundev/distributed-watcher/clients/mongo"
-	"github.com/mehmetolgundev/distributed-watcher/clients/zookeeper"
-	"github.com/mehmetolgundev/distributed-watcher/domain"
 )
 
 func main() {
+	ctx := context.Background()
+	mongoClient := db.NewClient(ctx)
 	zookeeperClient := zookeeper.NewClient()
-	mongoClient := mongo.NewClient(context.Background())
-	taskRepository := repository.NewTaskRepository(mongoClient)
 
-	zookeeperService := domain.NewZookeeperService(zookeeperClient, taskRepository)
+	taskDBRepository := repository.NewTaskDBRepository(mongoClient)
+	taskZKRepository := repository.NewTaskZKRepository(zookeeperClient)
 
-	zookeeperService.CreateNodeIfNotExists("/watcher", nil, 0, zk.WorldACL(zk.PermAll))
-
-	zookeeperService.Register()
-	zookeeperService.LeaderElection(context.Background())
-
-	zookeeperService.WatchLeader(context.Background())
-
+	taskService := usecase.NewTaskService(taskDBRepository, taskZKRepository)
+	go taskService.Register(ctx)
+	go taskService.Start(ctx)
 }
