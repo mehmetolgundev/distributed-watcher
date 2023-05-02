@@ -10,9 +10,11 @@ type TaskDBRepository interface {
 	UpdateTask(ctx context.Context, task *entity.Task)
 }
 type TaskZKRepository interface {
-	RegisterNode(ctx context.Context)
-	ElectLeader(ctx context.Context)
+	RegisterNode()
+	TryToBecomeLeader()
+	WatchLeader()
 	IsLeader() bool
 	WatchNodes(ctx context.Context)
-	QueueTask(taskGroupId int64, taskEventId int64)
+	QueueTask(taskGroupId int64, taskEventId int64) error
+	TakeTask()
 }

@@ -25,7 +25,7 @@ func NewTaskDBRepository(mongoClient *db.MongoClient) *TaskDBRepository {
 func (t *TaskDBRepository) GetTask(ctx context.Context) (*entity.Task, error) {
 	var task entity.Task
 	filter := bson.M{
-		"status": "Created",
+		"Status": "Created",
 	}
 	r := t.collection.FindOne(ctx, filter)
 	err := r.Decode(&task)
@@ -40,7 +40,7 @@ func (t *TaskDBRepository) GetTask(ctx context.Context) (*entity.Task, error) {
 func (t *TaskDBRepository) UpdateTask(ctx context.Context, task *entity.Task) {
 
 	filter := bson.M{
-		"eventId": task.EventId,
+		"EventId": task.EventId,
 	}
 	_, err := t.collection.ReplaceOne(ctx, filter, &task)
 	if err != nil {

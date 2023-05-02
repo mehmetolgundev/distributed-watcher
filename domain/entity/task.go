@@ -6,8 +6,8 @@ import (
 
 type Task struct {
 	ID      primitive.ObjectID `bson:"_id"`
-	EventId int64              `bson:"eventId"`
-	GroupId int64              `bson:"groupId"`
-	Event   string             `bson:"event"`
-	Status  string             `bson:"status"`
+	EventId int64              `bson:"EventId"`
+	GroupId int64              `bson:"GroupId"`
+	Event   string             `bson:"Event"`
+	Status  string             `bson:"Status"`
 }

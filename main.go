@@ -6,6 +6,7 @@ import (
 	"github.com/mehmetolgundev/distributed-watcher/infra/db"
 	"github.com/mehmetolgundev/distributed-watcher/infra/zookeeper"
 	"github.com/mehmetolgundev/distributed-watcher/repository"
+	"sync"
 )
 
 func main() {
@@ -17,6 +18,12 @@ func main() {
 	taskZKRepository := repository.NewTaskZKRepository(zookeeperClient)
 
 	taskService := usecase.NewTaskService(taskDBRepository, taskZKRepository)
-	go taskService.Register(ctx)
-	go taskService.Start(ctx)
+	taskService.Register(ctx)
+
+	wg := &sync.WaitGroup{}
+	wg.Add(3)
+	go taskService.WatchLeader(wg)
+	go taskService.WatchNodes(ctx, wg)
+	go taskService.Start(ctx, wg)
+	wg.Wait()
 }
